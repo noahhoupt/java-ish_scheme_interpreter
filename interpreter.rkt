@@ -6,7 +6,7 @@
 ;;;; Interpreter Part 1
 ;;;; ***************************************************
 
-(require "functionParser.rkt")
+(require "classParser.rkt")
 
 ; An interpreter for the simple language that uses call/cc for the continuations.
 ; Does not handle side effects.
