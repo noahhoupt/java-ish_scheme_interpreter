@@ -1,12 +1,15 @@
+
 #lang racket
 
 ;;;; ***************************************************
 ;;;; Noah Houpt, Gloria Tie, Juicetin Wen
 ;;;; EECS 345 Spring 2019
-;;;; Interpreter Part 1
+;;;; Interpreter Part 4
 ;;;; ***************************************************
 
-(require "classParser.rkt")
+;(require "classParser.rkt")
+(require "functionParser.rkt")
+(require racket/trace)
 
 ; An interpreter for the simple language that uses call/cc for the continuations.
 ; Does not handle side effects.
@@ -77,6 +80,34 @@
                                                    statement environment return break continue throw))
       (else (myerror "Unknown statement:"         (statement-type statement))))))
 
+
+; Creates a class-closure defintion
+(define class-closure
+  (lambda (statement environment)
+    (insert (classname statement) (classbody statement) environment)))
+
+; Given the class name it returns the corresponding class body
+; make sure to call get-class-closure on the environment when calling this method
+(define get-class-body
+ (lambda (classname environment)
+    (cadr (lookup classname (get-class-closure environment)))))
+
+; Parses through the class body but doesn't execute the methods
+
+
+; Abstractions for class closure
+(define classname cadr)
+(define classbody cddr)
+(define get-instance-closure car)
+(define get-class-closure cdr)
+
+; Creates a instance closure
+;(define instance-closure
+ ; (lambda (statement environment)
+   ;(
+
+
+
 ; Helper method that calls and evaluates other functions already in the environment
 (define interpret-funcall-runner
   (lambda (statement-list environment return break continue throw)
@@ -92,6 +123,9 @@
                  (lambda (break)
                    (interpret-statement (func-body statement-list)
                     environment break break continue throw))) return break continue throw) environment)])))
+
+(trace interpret-funcall-runner)
+
 
 ; Evaluates a function call within a function 
 (define interpret-funcall
@@ -135,6 +169,8 @@
     (cond
       [(null? (body statement)) environment]
       [else                     (insert (get-func-name statement) (body statement) environment)])))
+
+(trace interpret-function)
 
 ; Calls the return continuation with the given expression value
 (define interpret-return
@@ -542,4 +578,3 @@
                             (makestr (string-append str (string-append " " (symbol->string (car vals))))
                                      (cdr vals))))))
       (error-break (display (string-append str (makestr "" vals)))))))
-
